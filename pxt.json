@@ -1,7 +1,7 @@
 {
-    "name": "MaqueenPlus",
-    "version": "1.4.2",
-    "description": "",
+    "name": "MaqueenPlus-shurik179",
+    "version": "0.9",
+    "description": "MakeCode extension for DF robot Maqueen Plus. Based on DF robots work with modifications by shurik179",
     "dependencies": {
         "core": "*"
     },
@@ -14,9 +14,7 @@
         "NecIR.cpp",
         "ReceiverIR.h",
         "RemoteIR.h",
-        "shims.d.ts",
-        "_locales/zh-cn/MaqueenPlus-strings.json",
-        "_locales/zh-tw/MaqueenPlus-strings.json"
+        "shims.d.ts"
     ],
     "testFiles": [
         "test.ts"
