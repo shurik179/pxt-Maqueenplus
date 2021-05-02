@@ -118,8 +118,8 @@ enum Color {
 
 }
 
-//% weight=100  color=#00A654   block="Maqueen Plus" icon="\uf067"
-namespace DFRobotMaqueenPlus {
+//% weight=100  color=#00A654   block="MaqueenPlus" icon="\uf067"
+namespace MaqueenPlus {
     let irstate:number;
     let state:number;
     export class Packeta {
@@ -206,7 +206,7 @@ namespace DFRobotMaqueenPlus {
         buf[3] = _dir_R;
         buf[4] = _speed_R;
         pins.i2cWriteBuffer(0x10, buf)
-        
+
     }
     /**
      * Motor stop module
