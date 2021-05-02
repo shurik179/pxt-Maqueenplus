@@ -1,12 +1,12 @@
-/** 
+/**
  * @file pxt-DFRobot_Maqueenplus/maqueenplus.ts
  * @brief DFRobot's maqueenplus makecode library.
  * @n [Get the module here](https://www.dfrobot.com/product-2026.html)
  * @n Maqueen plus is a  STEM educational robot for micro:bit. Optimized with better power management and larger capacity power supply, it can be perfectly compatible with Huskylens AI Vision Sensor.
- * 
+ *
  * @copyright    [DFRobot](http://www.dfrobot.com), 2016
  * @copyright    MIT Lesser General Public License
- * 
+ *
  * @author [email](jie.tang@dfrobot.com)
  * @date  2019-11-19
  */
@@ -71,7 +71,7 @@ enum RGBLight {
     RGBA = 3
 }
 
-enum Patrol {
+enum LineSensor {
     //% block="L1"
     L1 = 1,
     //%block="L2"
@@ -112,7 +112,7 @@ enum Color {
     //%block="Cyan"
     CYAN = 6,
     //%block="White"
-    WHITH = 7,
+    WHITE = 7,
     //%block="OFF"
     OFF = 8
 
@@ -126,7 +126,7 @@ namespace DFRobotMaqueenPlus {
         public mye: string;
         public myparam: number;
     }
-   
+
     /**
      *  Init I2C until success
      */
@@ -175,35 +175,38 @@ namespace DFRobotMaqueenPlus {
      * Motor control module
      */
     //% weight=80
-    //% block="motor|%index|direction|%direction|speed|%speed "
-    //% speed.min=0 speed.max=255
-    export function mototRun(index: Motors, direction: Dir, speed: number): void {
-        let _speed:number;
-        if(speed >= 240) _speed=240;
-        else _speed=speed;
-        if (index == 1) {
-            let buf = pins.createBuffer(3)
-            buf[0] = 0x00;
-            buf[1] = direction;
-            buf[2] = _speed;
-            pins.i2cWriteBuffer(0x10, buf)
+    //% block="set speed| left  |%speed_L|right|%speed_R"
+    //% speed_L.min=-100 speed_L.max=100 speed_R.min=-100 speed_R.max=100
+    export function setMotors(speed_L: number, speed_R:number): void {
+        let _dir_L:number;
+        let _dir_R:number;
+        let _speed_L:number;
+        let _speed_R:number;
+        if (speed_L<0) {
+            _dir_L=2;
+            _speed_L=(-speed_L*255)/100;
+        }  else {
+            _dir_L=1;
+            _speed_L=(speed_L*255)/100;
+        }
+        if (_speed_L>255) _speed_L=255;
+        if (speed_R<0) {
+            _dir_R=2;
+            _speed_R=(-speed_R*255)/100;
+        }  else {
+            _dir_R=1;
+            _speed_R=(speed_R*255)/100;
+        }
+        if (_speed_R>255) _speed_R=255;
 
-        } if (index == 2) {
-            let buf = pins.createBuffer(3)
-            buf[0] = 0x02;
-            buf[1] = direction;
-            buf[2] = _speed;
-            pins.i2cWriteBuffer(0x10, buf)
-        }
-        if (index == 3) {
-            let buf = pins.createBuffer(5)
-            buf[0] = 0x00;
-            buf[1] = direction;
-            buf[2] = _speed;
-            buf[3] = direction;
-            buf[4] = _speed;
-            pins.i2cWriteBuffer(0x10, buf)
-        }
+        let buf = pins.createBuffer(5)
+        buf[0] = 0x00;
+        buf[1] = _dir_L;
+        buf[2] = _speed_L;
+        buf[3] = _dir_R;
+        buf[4] = _speed_R;
+        pins.i2cWriteBuffer(0x10, buf)
+        
     }
     /**
      * Motor stop module
@@ -256,7 +259,7 @@ namespace DFRobotMaqueenPlus {
     //         pins.i2cWriteBuffer(0x10, buf)
     //     }
     // }
-    
+
     /**
      * Read motor speed
      */
@@ -326,7 +329,7 @@ namespace DFRobotMaqueenPlus {
     }
 
     /**
-     * Control the color of RGB LED 
+     * Control the color of RGB LED
      */
     //% weight=50
     //% block="set |%rgbshow color|%color"
@@ -369,7 +372,7 @@ namespace DFRobotMaqueenPlus {
             case 5: mark = (patrol_y[0] & 0x01) == 0x01 ? 1 : 0; break;
             case 6: mark = (patrol_y[0] & 0x20) == 0x20 ? 1 : 0; break;
         }
-        
+
         return mark
     }
 
@@ -419,7 +422,7 @@ namespace DFRobotMaqueenPlus {
         return Version_x;
     }
     /**
-     * Read the distance value the ultrasound returns 
+     * Read the distance value the ultrasound returns
      */
     //% weight=20
     //%block="read ultrasonic sensor TRIG %T ECHO %E Company:CM"
@@ -517,7 +520,7 @@ namespace DFRobotMaqueenPlus {
     }
 
     /**
-     * Read the IR information 
+     * Read the IR information
      */
     //% weight=15
     //%  block="read IR"
@@ -550,14 +553,14 @@ namespace DFRobotMaqueenPlus {
         basic.pause(30)
     }
     /**
-     * clear the revolutions of wheel 
+     * clear the revolutions of wheel
      */
     //% weight=60
-    //%block="clear the revolutions of wheel %motor" 
+    //%block="clear the revolutions of wheel %motor"
     export function clearDistance(motor:Motors):void{
-        
+
         switch(motor){
-            case 1: 
+            case 1:
                 let buf1 = pins.createBuffer(2);
                 buf1[0] = 0x04;
                 buf1[1] = 0;
@@ -586,7 +589,7 @@ namespace DFRobotMaqueenPlus {
     function irCode(): number {
         return 0;
     }
-    
+
     //% weight=5
     //% group="micro:bit(v2)"
     //% block="read IR key value"
@@ -602,7 +605,7 @@ namespace DFRobotMaqueenPlus {
         state = 1;
         control.onEvent(11, 22, function() {
             cb(irstate)
-        }) 
+        })
     }
 
 function valuotokeyConversion():number{
@@ -642,7 +645,7 @@ function valuotokeyConversion():number{
             control.raiseEvent(11, 22)
         }
         }
-       
+
         basic.pause(50);
     })
 }
