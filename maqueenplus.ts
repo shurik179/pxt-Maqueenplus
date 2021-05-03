@@ -73,17 +73,17 @@ enum RGBLight {
 
 enum LineSensor {
     //% block="L1"
-    L1 = 1,
+    L3 = 0,
     //%block="L2"
-    L2 = 2,
+    L2 = 1,
     //%block="L3"
-    L3 = 5,
+    L1 = 2,
     //%block="R1"
     R1 = 3,
     //%block="R2"
     R2 = 4,
     //%block="R3"
-    R3 = 6
+    R3 = 5
 }
 
 enum Sonicunit {
@@ -122,6 +122,9 @@ enum Color {
 namespace MaqueenPlus {
     let irstate:number;
     let state:number;
+    let speedLeft:number;
+    let speedRight: number;
+    let line:number[]=[0,0,0,0,0,0];
     export class Packeta {
         public mye: string;
         public myparam: number;
@@ -175,7 +178,7 @@ namespace MaqueenPlus {
      * Motor control module
      */
     //% weight=80
-    //% block="set speed| left  |%speed_L|right|%speed_R"
+    //% block="set speed |left|%speed_L|right|%speed_R"
     //% speed_L.min=-100 speed_L.max=100 speed_R.min=-100 speed_R.max=100
     export function setMotors(speed_L: number, speed_R:number): void {
         let _dir_L:number;
@@ -212,32 +215,15 @@ namespace MaqueenPlus {
      * Motor stop module
      */
     //% weight=75
-    //% block="Motor|%index stop"
-    export function mototStop(index: Motors): void {
-
-        if (index == 1) {
-            let buf = pins.createBuffer(3)
-            buf[0] = 0x00;
-            buf[1] = 0;
-            buf[2] = 0;
-            pins.i2cWriteBuffer(0x10, buf)
-
-        } if (index == 2) {
-            let buf = pins.createBuffer(3)
-            buf[0] = 0x02;
-            buf[1] = 0;
-            buf[2] = 0;
-            pins.i2cWriteBuffer(0x10, buf)
-        }
-        if (index == 3) {
-            let buf = pins.createBuffer(5)
-            buf[0] = 0x00;
-            buf[1] = 0;
-            buf[2] = 0;
-            buf[3] = 0;
-            buf[4] = 0;
-            pins.i2cWriteBuffer(0x10, buf)
-        }
+    //% block="Stop motors"
+    export function stopMotors(): void {
+        let buf = pins.createBuffer(5);
+        buf[0] = 0x00;
+        buf[1] = 0;
+        buf[2] = 0;
+        buf[3] = 0;
+        buf[4] = 0;
+        pins.i2cWriteBuffer(0x10, buf);
     }
 
 
@@ -264,42 +250,37 @@ namespace MaqueenPlus {
      * Read motor speed
      */
     //% weight=65
-    //%block="read motor|%index speed"
-    export function readSpeed(index: Motors1): number {
-        let _speed:number,ret = -1;
-        pins.i2cWriteNumber(0x10, 0, NumberFormat.Int8LE)
-        let speed_x = pins.i2cReadBuffer(0x10, 4)
-        if (index == 1) {
-            if((Math.round(speed_x[1])<20) && (Math.round(speed_x[1]) != 0)){
-               ret = Math.round(speed_x[1]) + 255;
-            }else{
-                ret = Math.round(speed_x[1]);
-            }
-        } else if (index == 2) {
-            if((Math.round(speed_x[3])<20) && (Math.round(speed_x[3]) != 0)){
-                ret = Math.round(speed_x[3]) + 255;
-            }else{
-                ret = Math.round(speed_x[3]);
-            }
+    //%block="Get and save speed"
+    export function getSpeed(): void {
+        let _dir:number;
+        pins.i2cWriteNumber(0x10, 0, NumberFormat.Int8LE);
+        let speed_x = pins.i2cReadBuffer(0x10, 4);
+        _dir = speed_x[0];
+        if (_dir == 1) {
+            speedLeft=speed_x[1];
+        } else {
+            speedLeft=-speed_x[1];
         }
-        return ret;
+        _dir = speed_x[2];
+        if (_dir == 1) {
+            speedRight = speed_x[3];
+        } else {
+            speedRight = -speed_x[3];
+        }
     }
     /**
-     * Read motor direction(stop:0,forward:1,back:2)
+     * Access recently read motor speed
      */
-    //% weight=61
-    //%block="read motor|%index direction(stop:0,forward:1,back:2)"
-    export function readDirection(index: Motors1): number {
-        pins.i2cWriteNumber(0x10, 0, NumberFormat.Int8LE)
-        let dir_x = pins.i2cReadBuffer(0x10, 4)
+    //% weight = 66
+    //%block ="read motor|%index speed"
+    export function   readSpeed(index: Motors1): number {
         if (index == 1) {
-            return dir_x[0]
-
-        } else if (index == 2) {
-            return dir_x[2]
+            return speedLeft;
         }
-        return -1
-    }
+        return speedRight;
+    } 
+
+
 
     /**
      * Servo control module
@@ -307,7 +288,7 @@ namespace MaqueenPlus {
     //% weight=40
     //% block="servo|%index|angle|%angle"
     //% angle.min=0  angle.max=180
-    export function servoRun(index: Servos, angle: number): void {
+    export function setServo(index: Servos, angle: number): void {
         let buf = pins.createBuffer(2)
         switch (index) {
             case 1:
@@ -356,57 +337,17 @@ namespace MaqueenPlus {
     }
 
     /**
-     * Read line-tracking sensor status
-     */
-    //% weight=56
-    //%block="read line-tracking sensor|%patrol"
-    export function readPatrol(patrol: LineSensor): number {
-        pins.i2cWriteNumber(0x10, 0x1D, NumberFormat.Int8LE);
-        let patrol_y = pins.i2cReadBuffer(0x10, 1);
-        let mark: number ;
-        switch (patrol) {
-            case 1: mark = (patrol_y[0] & 0x04) == 0x04 ? 1 : 0; break;
-            case 2: mark = (patrol_y[0] & 0x02) == 0x02 ? 1 : 0; break;
-            case 3: mark = (patrol_y[0] & 0x08) == 0x08 ? 1 : 0; break;
-            case 4: mark = (patrol_y[0] & 0x10) == 0x10 ? 1 : 0; break;
-            case 5: mark = (patrol_y[0] & 0x01) == 0x01 ? 1 : 0; break;
-            case 6: mark = (patrol_y[0] & 0x20) == 0x20 ? 1 : 0; break;
-        }
-
-        return mark
-    }
-
-    /**
      * Read grayscale value of line-tracking sensor
      */
     //% weight=55
     //% block="read line-tracking sensor|%patrol grayscale "
-    export function readPatrolVoltage(patrol: LineSensor): number {
+    export function readLineSensors(): void {
         pins.i2cWriteNumber(0x10, 0x1E, NumberFormat.Int8LE);
-        let patrolv_y = pins.i2cReadBuffer(0x10, 12);
-        let patrol_AD: number;
-        switch (patrol) {
-            case 1:
-                patrol_AD = patrolv_y[5] | patrolv_y[4] << 8;
-                break;
-            case 2:
-                patrol_AD = patrolv_y[3] | patrolv_y[2] << 8;
-                break;
-            case 3:
-                patrol_AD = patrolv_y[7] | patrolv_y[6] << 8;
-                break;
-            case 4:
-                patrol_AD = patrolv_y[9] | patrolv_y[8] << 8;
-                break;
-            case 5:
-                patrol_AD = patrolv_y[1] | patrolv_y[0] << 8;
-                break;
-            default:
-                patrol_AD = patrolv_y[11] | patrolv_y[10] << 8;
-                break;
-
+        let data = pins.i2cReadBuffer(0x10, 12);
+        for (let i=0; i<6; i++) {
+            line[i] = data[2*i+1] | data[2*i] << 8;
         }
-        return patrol_AD;
+
     }
     /**
      * Get product information
