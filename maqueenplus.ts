@@ -118,7 +118,7 @@ enum Color {
 
 }
 
-//% weight=100  color=#00A654   block="MaqueenPlus" icon="\uf067"
+//% weight=100  color=#00A654   block="MaqueenPlus" icon="\uf013"
 namespace MaqueenPlus {
     let irstate:number;
     let state:number;
