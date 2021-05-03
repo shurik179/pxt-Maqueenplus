@@ -4,11 +4,11 @@
  * @n [Get the module here](https://www.dfrobot.com/product-2026.html)
  * @n Maqueen plus is a  STEM educational robot for micro:bit. Optimized with better power management and larger capacity power supply, it can be perfectly compatible with Huskylens AI Vision Sensor.
  *
- * @copyright    [DFRobot](http://www.dfrobot.com), 2016
- * @copyright    MIT Lesser General Public License
+ * @copyright    [DFRobot](http://www.dfrobot.com), 2021
+ * @copyright    MIT
  *
  * @author [email](jie.tang@dfrobot.com)
- * @date  2019-11-19
+ * @date  2021-05-02
  */
 
 let maqueencb: Action
