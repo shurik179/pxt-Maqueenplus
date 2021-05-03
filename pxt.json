@@ -1,6 +1,6 @@
 {
     "name": "MaqueenPlus-shurik179",
-    "version": "2.0-alpha.2",
+    "version": "2.0.0",
     "description": "MakeCode extension for DF robot Maqueen Plus. Based on DF robots work with modifications by shurik179",
     "dependencies": {
         "core": "*"
