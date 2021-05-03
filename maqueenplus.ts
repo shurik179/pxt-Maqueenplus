@@ -360,7 +360,7 @@ namespace MaqueenPlus {
      */
     //% weight=56
     //%block="read line-tracking sensor|%patrol"
-    export function readPatrol(patrol: Patrol): number {
+    export function readPatrol(patrol: LineSensor): number {
         pins.i2cWriteNumber(0x10, 0x1D, NumberFormat.Int8LE);
         let patrol_y = pins.i2cReadBuffer(0x10, 1);
         let mark: number ;
@@ -381,7 +381,7 @@ namespace MaqueenPlus {
      */
     //% weight=55
     //% block="read line-tracking sensor|%patrol grayscale "
-    export function readPatrolVoltage(patrol: Patrol): number {
+    export function readPatrolVoltage(patrol: LineSensor): number {
         pins.i2cWriteNumber(0x10, 0x1E, NumberFormat.Int8LE);
         let patrolv_y = pins.i2cReadBuffer(0x10, 12);
         let patrol_AD: number;
