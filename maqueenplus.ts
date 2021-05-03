@@ -115,6 +115,8 @@ namespace MaqueenPlus {
     let state:number;
     let speedLeft:number;
     let speedRight: number;
+    let encoderL:number;
+    let encoderR: number;
     let lineRaw:number[]=[0,0,0,0,0,0];
     export class Packeta {
         public mye: string;
@@ -325,13 +327,37 @@ namespace MaqueenPlus {
      * Access recently read line sensor raw values
      */
     //% weight = 56
-    //%block =" line senosr |%index raw value"
-    export function   readLineSensors(index: LineSensor): number {
+    //%block =" line sensor |%index raw value"
+    export function   LineSensorRaw(index: LineSensor): number {
         return lineRaw[index];
     }
 
 
-
+    /**
+     * get the revolutions of wheel
+     */
+    //% weight=60
+    //%block="get the revolutions of wheel %motor"
+    export function getEncoders():void {
+        let distance:number;
+        pins.i2cWriteNumber(0x10, 4, NumberFormat.Int8LE);
+        let speed_x = pins.i2cReadBuffer(0x10, 4);
+        encoderL = (speed_x[0]<<8|speed_x[1]);
+        encoderR = (speed_x[2]<<8|speed_x[3]);
+    }
+    /**
+     * clear the motor encoders (rotation counters)
+     */
+    //% weight=60
+    //%block="reset the encoder count"
+    export function resetEncoders():void{
+                let buf3 = pins.createBuffer(4);
+                buf3[0] = 0x04;
+                buf3[1] = 0;
+                buf3[2] = 0;
+                buf3[3] = 0;
+                pins.i2cWriteBuffer(0x10, buf3);
+    }
 
 
     /**
@@ -460,53 +486,7 @@ namespace MaqueenPlus {
         IrPressEvent += 1;
         onPressEvent(IrPressEvent, maqueencb);
     }
-    /**
-     * get the revolutions of wheel
-     */
-    //% weight=60
-    //%block="get the revolutions of wheel %motor"
-    export function readeDistance(motor:Motors1):string {
-        let distance:number;
-        pins.i2cWriteNumber(0x10, 4, NumberFormat.Int8LE)
-        let speed_x = pins.i2cReadBuffer(0x10, 4)
-        switch(motor){
-            case 1:distance = ((speed_x[0]<<8|speed_x[1])*10)/900;break;
-            default:distance = ((speed_x[2]<<8|speed_x[3])*10)/900;break;
-        }
-        let index=distance.toString().indexOf(".");
-        let x:string=distance.toString().substr(0,index+3)
-        return x;
-        basic.pause(30)
-    }
-    /**
-     * clear the revolutions of wheel
-     */
-    //% weight=60
-    //%block="clear the revolutions of wheel %motor"
-    export function clearDistance(motor:Motors):void{
 
-        switch(motor){
-            case 1:
-                let buf1 = pins.createBuffer(2);
-                buf1[0] = 0x04;
-                buf1[1] = 0;
-                pins.i2cWriteBuffer(0x10, buf1);
-                break;
-            case 2:
-                let buf2 = pins.createBuffer(2);
-                buf2[0] = 0x06;
-                buf2[1] = 0;
-                pins.i2cWriteBuffer(0x10, buf2);
-                break;
-            default:
-                let buf3 = pins.createBuffer(4);
-                buf3[0] = 0x04;
-                buf3[1] = 0;
-                buf3[2] = 0;
-                buf3[3] = 0;
-                pins.i2cWriteBuffer(0x10, buf3);
-        }
-    }
     /**
      * Read IR sensor value V2.
      */
