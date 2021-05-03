@@ -35,15 +35,6 @@ enum Motors {
     M1 = 1,
     //% block="right"
     M2 = 2,
-    //% block="ALL"
-    ALL = 3
-}
-
-enum Motors1 {
-    //% block="left"
-    M1 = 1,
-    //% block="right"
-    M2 = 2,
 }
 
 enum Dir {
@@ -124,7 +115,7 @@ namespace MaqueenPlus {
     let state:number;
     let speedLeft:number;
     let speedRight: number;
-    let line:number[]=[0,0,0,0,0,0];
+    let lineRaw:number[]=[0,0,0,0,0,0];
     export class Packeta {
         public mye: string;
         public myparam: number;
@@ -228,25 +219,6 @@ namespace MaqueenPlus {
 
 
     /**
-     * Compensate speed difference between two motors
-     */
-    // //% weight=7
-    // //% block="motor compensation|%motor speed|%speed"
-    // //% speed.min=0 speed.max=255
-    // export function mostotCompensation(motor: Motors1, speed: number): void {
-    //     let buf = pins.createBuffer(2)
-    //     if (motor == 1) {
-    //         buf[0] = 0x08;
-    //         buf[1] = speed;
-    //         pins.i2cWriteBuffer(0x10, buf)
-    //     } else if (motor == 2) {
-    //         buf[0] = 0x09;
-    //         buf[1] = speed;
-    //         pins.i2cWriteBuffer(0x10, buf)
-    //     }
-    // }
-
-    /**
      * Read motor speed
      */
     //% weight=65
@@ -272,13 +244,13 @@ namespace MaqueenPlus {
      * Access recently read motor speed
      */
     //% weight = 66
-    //%block ="read motor|%index speed"
-    export function   readSpeed(index: Motors1): number {
+    //%block ="motor|%index speed"
+    export function   readSpeed(index: Motors): number {
         if (index == 1) {
             return speedLeft;
         }
         return speedRight;
-    } 
+    }
 
 
 
@@ -341,14 +313,27 @@ namespace MaqueenPlus {
      */
     //% weight=55
     //% block="read line-tracking sensor|%patrol grayscale "
-    export function readLineSensors(): void {
+    export function getLineSensors(): void {
         pins.i2cWriteNumber(0x10, 0x1E, NumberFormat.Int8LE);
         let data = pins.i2cReadBuffer(0x10, 12);
         for (let i=0; i<6; i++) {
-            line[i] = data[2*i+1] | data[2*i] << 8;
+            lineRaw[i] = data[2*i+1] | data[2*i] << 8;
         }
 
     }
+    /**
+     * Access recently read line sensor raw values
+     */
+    //% weight = 56
+    //%block =" line senosr |%index raw value"
+    export function   readLineSensors(index: LineSensor): number {
+        return lineRaw[index];
+    }
+
+
+
+
+
     /**
      * Get product information
      */
