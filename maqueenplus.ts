@@ -352,7 +352,7 @@ namespace MaqueenPlus {
      */
     //% weight=60
     //%block="encoder reading for motor|%motor "
-    export function encoder(motor: Motors):void {
+    export function encoder(motor: Motors):number {
         if (motor == 1) return (_encoderL)
         return (_encoderR)
     }
