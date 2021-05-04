@@ -17,6 +17,7 @@ let maqueene = "1"
 let maqueenparam = 0
 let alreadyInit = 0
 let IrPressEvent = 0
+let TICKS_TO_MM = 1.6
 
 enum PIN {
     P0 = 3,
@@ -55,11 +56,11 @@ enum Servos {
 
 enum RGBLight {
     //%block="RGB_L"
-    RGBL = 1,
+    LEFT = 1,
     //%block="RGB_R"
-    RGBR = 2,
+    RIGHT = 2,
     //%block="ALL"
-    RGBA = 3
+    ALL = 3
 }
 
 enum LineSensor {
@@ -115,8 +116,8 @@ namespace MaqueenPlus {
     let state:number;
     let speedLeft:number;
     let speedRight: number;
-    let encoderL:number;
-    let encoderR: number;
+    let _encoderL:number;
+    let _encoderR: number;
     let lineRaw:number[]=[0,0,0,0,0,0];
     export class Packeta {
         public mye: string;
@@ -337,14 +338,25 @@ namespace MaqueenPlus {
      * get the revolutions of wheel
      */
     //% weight=60
-    //%block="get the revolutions of wheel %motor"
-    export function getEncoders():void {
+    //%block="update encoder readings"
+    export function updateEncoders():void {
         let distance:number;
         pins.i2cWriteNumber(0x10, 4, NumberFormat.Int8LE);
         let speed_x = pins.i2cReadBuffer(0x10, 4);
-        encoderL = (speed_x[0]<<8|speed_x[1]);
-        encoderR = (speed_x[2]<<8|speed_x[3]);
+        _encoderL = (speed_x[0]<<8|speed_x[1]);
+        _encoderR = (speed_x[2]<<8|speed_x[3]);
     }
+
+    /**
+     * get the revolutions of wheel
+     */
+    //% weight=60
+    //%block="encoder reading for motor|%motor "
+    export function encoder(motor: Motors):void {
+        if (motor == 1) return (_encoderL)
+        return (_encoderR)
+    }
+
     /**
      * clear the motor encoders (rotation counters)
      */
