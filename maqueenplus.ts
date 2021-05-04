@@ -17,7 +17,7 @@ let maqueene = "1"
 let maqueenparam = 0
 let alreadyInit = 0
 let IrPressEvent = 0
-let TICKS_TO_MM = 1.6
+let TICKS_TO_MM = 0.86
 
 enum PIN {
     P0 = 3,
@@ -356,6 +356,16 @@ namespace MaqueenPlus {
         if (motor == 1) return (_encoderL)
         return (_encoderR)
     }
+    /**
+     * get the distance travelled since last encoder reset
+     */
+    //% weight=60
+    //%block="distance travelled (mm) "
+    export function traveledDistance():number {
+        return ((_encoderR+_encoderL)*TICKS_TO_MM);
+    }
+
+
 
     /**
      * clear the motor encoders (rotation counters)
