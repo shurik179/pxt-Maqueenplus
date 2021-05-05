@@ -424,7 +424,7 @@ namespace MaqueenPlus {
         PID(0);
         resetEncoders();
         setMotors(_dir*speed,-_dir*speed);
-        while ((_encoderL-_encoderR)<target-30) {
+        while ((_encoderL+_encoderR)<target-30) {
             updateEncoders();
             basic.pause(5);
         }
