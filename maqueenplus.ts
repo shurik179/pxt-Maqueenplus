@@ -17,7 +17,7 @@ let maqueene = "1"
 let maqueenparam = 0
 let alreadyInit = 0
 let IrPressEvent = 0
-let TICKS_TO_MM = 0.86
+let TICKS_TO_MM = 0.855
 
 enum PIN {
     P0 = 3,
@@ -371,7 +371,7 @@ namespace MaqueenPlus {
     //%block="go forward for |%distance |mm at |%speed |speed "
     export function goForward(distance: number, speed:number ):void {
         let target=distance/TICKS_TO_MM;
-        PID(1);
+        PID(0);
         resetEncoders();
         setMotors(speed,speed);
         while ((_encoderR+_encoderL)<target) {
