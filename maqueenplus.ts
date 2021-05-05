@@ -18,6 +18,7 @@ let maqueenparam = 0
 let alreadyInit = 0
 let IrPressEvent = 0
 let TICKS_TO_MM = 0.855
+let TICKS_TO_DEG = 1.0
 
 enum PIN {
     P0 = 3,
@@ -371,14 +372,65 @@ namespace MaqueenPlus {
     //%block="go forward for |%distance |mm at |%speed |speed "
     export function goForward(distance: number, speed:number ):void {
         let target=distance/TICKS_TO_MM;
-        PID(0);
+        PID(1);
         resetEncoders();
         setMotors(speed,speed);
-        while ((_encoderR+_encoderL)<target) {
+        while ((_encoderR+_encoderL)<target-80) {
             updateEncoders();
+            basic.pause(5);
+        }
+        PID(0);
+        setMotors(15,15);
+        while ((_encoderR+_encoderL)<target-30) {
+            updateEncoders();
+            basic.pause(5);
         }
         stopMotors();
     }
+    /**
+     * get the distance travelled since last encoder reset
+     */
+    //% weight=60
+    //%block="go backward for |%distance |mm at |%speed |speed "
+    export function goBackward(distance: number, speed:number ):void {
+        let target=distance/TICKS_TO_MM;
+        PID(1);
+        resetEncoders();
+        setMotors(-speed,-speed);
+        while ((_encoderR+_encoderL)<target-80) {
+            updateEncoders();
+            basic.pause(5);
+        }
+        PID(0);
+        setMotors(-15,-15);
+        while ((_encoderR+_encoderL)<target-30) {
+            updateEncoders();
+            basic.pause(5);
+        }
+        stopMotors();
+    }
+    /**
+     * get the distance travelled since last encoder reset
+     */
+    //% weight=60
+    //%block="go backward for |%distance |mm at |%speed |speed "
+    export function turn(angle: number, speed:number ):void {
+        let target=angle/TICKS_TO_DEG;
+        let _dir=1;
+        if (angle<0) {
+            _dir=-1;
+            target=-target;
+        }
+        PID(0);
+        resetEncoders();
+        setMotors(_dir*speed,-_dir*speed);
+        while ((_encoderL-_encoderR)<target-30) {
+            updateEncoders();
+            basic.pause(5);
+        }
+        stopMotors();
+    }
+
 
 
 
