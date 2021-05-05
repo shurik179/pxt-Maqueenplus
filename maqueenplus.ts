@@ -372,7 +372,7 @@ namespace MaqueenPlus {
     //%block="go forward for |%distance |mm at |%speed |speed "
     export function goForward(distance: number, speed:number ):void {
         let target=distance/TICKS_TO_MM;
-        PID(1);
+        PID(0);
         resetEncoders();
         setMotors(speed,speed);
         while ((_encoderR+_encoderL)<target-80) {
@@ -394,7 +394,7 @@ namespace MaqueenPlus {
     //%block="go backward for |%distance |mm at |%speed |speed "
     export function goBackward(distance: number, speed:number ):void {
         let target=distance/TICKS_TO_MM;
-        PID(1);
+        PID(0);
         resetEncoders();
         setMotors(-speed,-speed);
         while ((_encoderR+_encoderL)<target-80) {
