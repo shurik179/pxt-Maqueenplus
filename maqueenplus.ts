@@ -364,6 +364,21 @@ namespace MaqueenPlus {
     export function traveledDistance():number {
         return ((_encoderR+_encoderL)*TICKS_TO_MM);
     }
+    /**
+     * get the distance travelled since last encoder reset
+     */
+    //% weight=60
+    //%block="go forward for |%distance |mm at |%speed |speed "
+    export function goForward(distance: number, speed:number ):void {
+        let target=distance/TICKS_TO_MM;
+        PID(PID.ON);
+        resetEncoders();
+        setMotors(speed,speed);
+        while ((_encoderR+_encoderL)<target) {
+            updateEncoders();
+        }
+        stopMotors();
+    }
 
 
 
@@ -379,6 +394,8 @@ namespace MaqueenPlus {
                 buf3[2] = 0;
                 buf3[3] = 0;
                 pins.i2cWriteBuffer(0x10, buf3);
+                _encoderL=0;
+                _encoderR=0;
     }
 
 
